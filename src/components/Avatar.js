@@ -1,4 +1,4 @@
-import { OrbitControls, useGLTF } from '@react-three/drei'
+import { ContactShadows, Environment, OrbitControls, useGLTF } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import React, { useEffect, useRef, useState } from 'react'
 import { HexAlphaColorPicker, HexColorInput, HexColorPicker } from 'react-colorful'
@@ -98,6 +98,9 @@ function Avatar({click,setClick}) {
                 ))
                 }
                 {/* <ambientLight color={'blue'} /> */}
+                <ContactShadows position={[0, -0.8, 0]} opacity={0.25} scale={10} blur={1.5} far={0.8} />
+                <ambientLight intensity={0.4} />
+                <Environment preset='city' />
                 <pointLight position={[200,200,200]} />
                 <pointLight position={[-300,-200,200]} />
                 <OrbitControls enableZoom={false} maxAzimuthAngle={orientation=='Front'?0:orientation=='Isometric'?-Math.PI/6 :Math.PI/3} minAzimuthAngle={orientation=='Front'?0:orientation=='Isometric'?-Math.PI/6 :-Math.PI/3} minPolarAngle={orientation=='Front'?Math.PI/2:orientation=='Isometric'?Math.PI/3 :Math.PI/3} maxPolarAngle={orientation=='Front'?Math.PI/2:orientation=='Isometric'?Math.PI/3 :Math.PI/2} />
