@@ -2,7 +2,7 @@
   "name": "craftor-project",
   "version": "0.1.0",
   "private": true,
-  "homepage":"http://crafttor-plugin.github.io/",
+  "homepage":"https://crafttor-plugin.github.io/crafttor-3d/",
   "dependencies": {
     "@react-three/drei": "^9.56.24",
     "@react-three/fiber": "^8.11.0",
