@@ -14,18 +14,18 @@ function Header({click, setClick}) {
     <div className='relative' >
       <img onClick={() => {setClick('environment');setEnvironment(!environment);setLightIcon(0);  }} className={`mx-2 cursor-pointer rounded-full p-2 w-[32px] h-[32px] ${environment?'bg-gray-200':''} `} src={icon} />
       <div className={`w-[180px] bg-pink-200 z-[2] absolute top-[36px] rounded-sm ${environment?'visible':'hidden'} `}>
-        <p className='font-medium px-4 py-2 hover:bg-white bg-gray-200 cursor-pointer text-sm' onClick={() => {setClick('pointlight'); setEnvironment(!environment)}} >Point Light </p>
-        <p className='font-medium px-4 py-2 hover:bg-white bg-gray-200 cursor-pointer text-sm' onClick={() => {setClick('spotlight'); setEnvironment(!environment)}} >Spot Light </p>
-        <p className='font-medium px-4 py-2 hover:bg-white bg-gray-200 cursor-pointer text-sm' onClick={() => {setClick('ambientlight'); setEnvironment(!environment)}} >Ambient Light </p>
+        <p className='font-medium px-4 py-2 hover:bg-white bg-gray-200 cursor-pointer text-sm' onClick={() => {setClick('pointLight'); setEnvironment(!environment)}} >Point Light </p>
+        <p className='font-medium px-4 py-2 hover:bg-white bg-gray-200 cursor-pointer text-sm' onClick={() => {setClick('spotLight'); setEnvironment(!environment)}} >Spot Light </p>
+        <p className='font-medium px-4 py-2 hover:bg-white bg-gray-200 cursor-pointer text-sm' onClick={() => {setClick('ambientLight'); setEnvironment(!environment)}} >Ambient Light </p>
       </div>
     </div>
     <div className='relative' >
     <img onClick={() => {setClick('light'); setLightIcon(!lightIcon);setEnvironment(0) }} className={`mx-2 cursor-pointer rounded-full p-2 w-[32px] h-[32px] ${lightIcon?'bg-gray-200':''} `} src={light} />
   
       <div className={`w-[180px] bg-pink-200 z-[2] absolute top-[36px] rounded-sm ${lightIcon?'visible':'hidden'} `}>
-        <p className='font-medium px-4 py-2 hover:bg-white bg-gray-200 cursor-pointer text-sm' onClick={() => {setClick('pointlight');setLightIcon(!lightIcon)}} >Point Light </p>
-        <p className='font-medium px-4 py-2 hover:bg-white bg-gray-200 cursor-pointer text-sm' onClick={() => {setClick('spotlight');setLightIcon(!lightIcon)}} >Spot Light </p>
-        <p className='font-medium px-4 py-2 hover:bg-white bg-gray-200 cursor-pointer text-sm' onClick={() => {setClick('ambientlight');setLightIcon(!lightIcon)}} >Ambient Light </p>
+        <p className='font-medium px-4 py-2 hover:bg-white bg-gray-200 cursor-pointer text-sm' onClick={() => {setClick('pointLight');setLightIcon(!lightIcon)}} >Point Light </p>
+        <p className='font-medium px-4 py-2 hover:bg-white bg-gray-200 cursor-pointer text-sm' onClick={() => {setClick('spotLight');setLightIcon(!lightIcon)}} >Spot Light </p>
+        <p className='font-medium px-4 py-2 hover:bg-white bg-gray-200 cursor-pointer text-sm' onClick={() => {setClick('ambientLight');setLightIcon(!lightIcon)}} >Ambient Light </p>
       </div>
     </div>
     
