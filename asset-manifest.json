@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/crafttor-3d/static/css/main.c6dd3cd0.css",
-    "main.js": "/crafttor-3d/static/js/main.e6292079.js",
+    "main.css": "/crafttor-3d/static/css/main.152c658f.css",
+    "main.js": "/crafttor-3d/static/js/main.19476318.js",
     "static/js/787.0bbd8c05.chunk.js": "/crafttor-3d/static/js/787.0bbd8c05.chunk.js",
     "static/media/avatar.gltf": "/crafttor-3d/static/media/avatar.95ff43bf586da044b5ec.gltf",
     "index.html": "/crafttor-3d/index.html",
-    "main.c6dd3cd0.css.map": "/crafttor-3d/static/css/main.c6dd3cd0.css.map",
-    "main.e6292079.js.map": "/crafttor-3d/static/js/main.e6292079.js.map",
+    "main.152c658f.css.map": "/crafttor-3d/static/css/main.152c658f.css.map",
+    "main.19476318.js.map": "/crafttor-3d/static/js/main.19476318.js.map",
     "787.0bbd8c05.chunk.js.map": "/crafttor-3d/static/js/787.0bbd8c05.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.c6dd3cd0.css",
-    "static/js/main.e6292079.js"
+    "static/css/main.152c658f.css",
+    "static/js/main.19476318.js"
   ]
 }
