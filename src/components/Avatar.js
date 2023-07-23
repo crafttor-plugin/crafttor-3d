@@ -401,12 +401,6 @@ function Avatar({click, setClick, environmentValue, setEnvironmentValue}) {
                     hasVariations: avatar[val]?.hasVariations,
                   });
                   setPanelsActive(true);
-                  // let materialColor = avatar[val].component.material.color;
-                  // setColor(
-                  //   `rgb(${255 * materialColor.r},${255 * materialColor.g},${
-                  //     255 * materialColor.b
-                  //   })`,
-                  // );
                 }}
                 {...avatar[val].element}
                 position={[

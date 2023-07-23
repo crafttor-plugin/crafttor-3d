@@ -4,9 +4,6 @@ import {useEffect, useRef, useState} from 'react';
 import Header from './components/Header';
 import Avatar from './components/Avatar';
 import './App.css';
-import {getGLBFile} from './services/services';
-import {useLoader} from '@react-three/fiber';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 function App() {
   const [click, setClick] = useState();
   const [environmentValue, setEnvironmentValue] = useState(null);
