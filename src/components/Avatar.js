@@ -2,6 +2,7 @@ import {
   ContactShadows,
   Environment,
   OrbitControls,
+  PerspectiveCamera,
   useGLTF,
 } from '@react-three/drei';
 import {Canvas, useLoader} from '@react-three/fiber';
@@ -19,7 +20,7 @@ import dynamic from '../assets/images/dynamic.png';
 import {getGLBFile, getResponseAPI, getapi} from '../services/services';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 
-function Avatar({click, setClick}) {
+function Avatar({click, setClick, environmentValue, setEnvironmentValue}) {
   const [apiData, setApiData] = useState(null);
   const [componentsGLB, setComponentsGLB] = useState(null);
   const {nodes, materials} = useGLTF(require('../assets/gftf/avatar.gltf'));
@@ -38,7 +39,7 @@ function Avatar({click, setClick}) {
         y: 200,
         z: 300,
       },
-      color: '#',
+      color: '#FFFAE6',
     },
     {
       type: 'spotLight',
@@ -48,9 +49,12 @@ function Avatar({click, setClick}) {
         y: -200,
         z: 300,
       },
-      color: '#',
+      color: '#FFFAE6',
     },
   ]);
+  const [original, setOriginal] = useState({
+    lights: JSON.parse(JSON.stringify(lights)),
+  });
   const canvasRef = useRef(null);
   const [componentSelect, setComponentSelect] = useState('');
 
@@ -81,9 +85,20 @@ function Avatar({click, setClick}) {
       };
       loader.load(apiData.base.file, gltf => {
         let {scene} = gltf;
+        let variations = {};
+        variations[scene.name] = {};
+        variations[scene.name]['colors'] = data['base']?.colors;
+        variations[scene.name]['currentColor'] = data['base'].preset.color;
+        variations[scene.name]['element'] = scene;
+        variations[scene.name]['image'] = '';
+        variations[scene.name]['name'] = scene.name;
+        variations[scene.name]['roughness'] = 0;
+        variations[scene.name]['metalness'] = 0;
+        variations[scene.name]['rule'] = {};
         data['base'] = {
           ...data['base'],
           scene: scene,
+          variations: variations,
         };
         setComponentsGLB({...data});
       });
@@ -134,7 +149,11 @@ function Avatar({click, setClick}) {
   }, [apiData]);
 
   useEffect(() => {
-    if (componentSelect && componentSelect?.item) {
+    if (
+      componentSelect &&
+      componentSelect?.item &&
+      componentSelect?.hasVariations
+    ) {
       let avatarVal = avatar;
       avatarVal[componentSelect?.component] =
         componentsGLB?.categories[componentSelect?.component]?.variation[
@@ -181,12 +200,35 @@ function Avatar({click, setClick}) {
           let variation =
             val[category].variation[val[category].preset.variation];
           variation.currentColor = val[category].preset.color;
+
+          variation['hasVariations'] = true;
           avatarVal[category] = variation;
         }
       });
+      setOriginal(val => ({
+        lights: val.lights,
+        avatar: JSON.parse(JSON.stringify(avatarVal)),
+      }));
+      if (componentsGLB?.base?.variations) {
+        componentsGLB?.base?.variations['Scene'].element.children.map(val => {
+          avatarVal[val.name] = {
+            ...componentsGLB?.base?.variations['Scene'],
+            element: val,
+            metalness: val.metalness ?? 0,
+            roughness: val.roughness ?? 0,
+            hasVariations: false,
+          };
+          if (!componentsGLB?.base?.preset?.applyTo.includes(val.name)) {
+            avatarVal[val.name].currentColor = '';
+          }
+        });
+      }
+      // avatarVal['base'] = componentsGLB?.base.variations['Scene'];
+
       setAvatar(avatarVal);
     }
   }, [componentsGLB]);
+  console.log(componentsGLB);
 
   if (click == 'download') {
     const canvas = canvasRef.current;
@@ -247,7 +289,6 @@ function Avatar({click, setClick}) {
     setClick('');
   }
   console.log(avatar);
-  console.log(lights);
   return (
     <div
       onClick={event => {
@@ -256,6 +297,26 @@ function Avatar({click, setClick}) {
       }}
       className="w-full h-full flex">
       <div className="h-[480px] w-[480px] flex mx-auto left-0 right-0 self-center items-center -mt-[64px] ">
+        <button
+          onClick={() => {
+            // setApiData({...setApiData});
+            // setComponentsGLB({...setComponentsGLB});
+            Object.keys(original.avatar).map(val => {
+              console.log(componentsGLB.categories[val]);
+              original.avatar[val].element =
+                componentsGLB.categories[val].variation[
+                  original.avatar[val].name
+                ].element;
+            });
+            setLights([...original.lights]);
+            setAvatar({...original.avatar});
+          }}
+          className={`${
+            original.avatar == JSON.stringify(avatar) ? 'hidden' : 'visible'
+          } absolute px-[12px] py-[8px] rounded-full shadow-lg top-[48px] left-0 right-0 w-fit mx-auto bg-white font-semibold`}>
+          Reset
+        </button>
+
         <Canvas
           dpr={[1, 2]}
           flat
@@ -267,47 +328,64 @@ function Avatar({click, setClick}) {
             setCanvasReady(true);
           }}
           gl={{preserveDrawingBuffer: true, logarithmicDepthBuffer: true}}>
-          {componentsGLB?.base &&
-            componentsGLB?.base?.scene?.children?.map((val, keyId) =>
-              val.type == 'Mesh' ? (
-                <mesh
-                  key={`mesh-${keyId}`}
-                  // material-roughness={componentRoughness[val]}
-                  // material-metalness={componentMetalness[val]}
-                  // material-color={componentColor[val]}
-                  onClick={event => {
-                    // event.stopPropagation();
-                    // setComponentSelect('base');
-                    // setPanelsActive(true);
-                    // let materialColor = avatar[val].component.material.color;
-                    // setColor(
-                    //   `rgb(${255 * materialColor.r},${255 * materialColor.g},${
-                    //     255 * materialColor.b
-                    //   })`,
-                    // );
-                  }}
-                  {...val}
-                  position={[
-                    val.position.x,
-                    val.position.y - 1,
-                    val.position.z,
-                  ]}
-                />
-              ) : (
-                <group
-                  key={`group-${keyId}`}
-                  {...val}
-                  position={[
-                    val.position.x,
-                    val.position.y - 1,
-                    val.position.z,
-                  ]}>
-                  {Object.values(val.children).map(val => (
-                    <mesh {...val} />
-                  ))}
-                </group>
-              ),
-            )}
+          {/* <group
+            onClick={() => {
+              setComponentSelect({
+                component: 'base',
+                item: Object.keys(componentsGLB?.base?.variations)[0],
+              });
+            }}>
+            {componentsGLB?.base &&
+              componentsGLB?.base?.scene?.children?.map((val, keyId) =>
+                val.type == 'Mesh' ? (
+                  <mesh
+                    material-color={val.name == 'skin' && 'pink'}
+                    key={`mesh-${keyId}`}
+                    // material-roughness={componentRoughness[val]}
+                    // material-metalness={componentMetalness[val]}
+                    // material-color={componentColor[val]}
+                    onClick={event => {
+                      console.log(val.name);
+                      // event.stopPropagation();
+                      // setComponentSelect('base');
+                      // setPanelsActive(true);
+                      // let materialColor = avatar[val].component.material.color;
+                      // setColor(
+                      //   `rgb(${255 * materialColor.r},${255 * materialColor.g},${
+                      //     255 * materialColor.b
+                      //   })`,
+                      // );
+                    }}
+                    {...val}
+                    position={[
+                      val.position.x,
+                      val.position.y - 1,
+                      val.position.z,
+                    ]}
+                  />
+                ) : (
+                  <group
+                    key={`group-${keyId}`}
+                    {...val}
+                    position={[
+                      val.position.x,
+                      val.position.y - 1,
+                      val.position.z,
+                    ]}>
+                    {Object.values(val.children).map(values => (
+                      <mesh
+                        onClick={() => {
+                          console.log(values.name);
+                        }}
+                        material-color={values.name == 'skin' && 'pink'}
+                        {...values}
+                      />
+                    ))}
+                  </group>
+                ),
+              )}
+          </group> */}
+
           {Object.keys(avatar).map(val =>
             avatar[val].element.type == 'Mesh' ? (
               <mesh
@@ -316,9 +394,11 @@ function Avatar({click, setClick}) {
                 material-color={avatar[val].currentColor}
                 onClick={event => {
                   event.stopPropagation();
+                  console.log(val);
                   setComponentSelect({
                     component: val,
                     item: avatar[val]?.element?.name,
+                    hasVariations: avatar[val]?.hasVariations,
                   });
                   setPanelsActive(true);
                   // let materialColor = avatar[val].component.material.color;
@@ -343,37 +423,57 @@ function Avatar({click, setClick}) {
                   avatar[val].element.position.y - 1,
                   avatar[val].element.position.z,
                 ]}>
-                {Object.values(avatar[val].element.children).map(val => (
-                  <mesh {...val} />
+                {Object.values(avatar[val].element.children).map(values => (
+                  <mesh
+                    {...values}
+                    material-roughness={avatar[val].roughness}
+                    material-metalness={avatar[val].metalness}
+                    material-color={avatar[val].currentColor}
+                    onClick={event => {
+                      event.stopPropagation();
+                      setComponentSelect({
+                        component: val,
+                        item: avatar[val]?.element?.name,
+                        hasVariations: avatar[val]?.hasVariations,
+                      });
+                    }}
+                  />
                 ))}
               </group>
             ),
           )}
 
-          {lights?.map(light =>
-            light.type == 'pointLight' ? (
-              <pointLight
-                position={[
-                  light.position.x,
-                  light.position.y,
-                  light.position.z,
-                ]}
-                color={light.color}
-              />
-            ) : light.type == 'spotLight' ? (
-              <spotLight
-                position={[
-                  light.position.x,
-                  light.position.y,
-                  light.position.z,
-                ]}
-                color={light.color}
-              />
-            ) : (
-              <ambientLight intensity={0.4} />
-            ),
-          )}
+          {environmentValue === null &&
+            lights?.map(light =>
+              light.type == 'pointLight' ? (
+                <pointLight
+                  position={[
+                    light.position.x,
+                    light.position.y,
+                    light.position.z,
+                  ]}
+                  color={light.color}
+                />
+              ) : light.type == 'spotLight' ? (
+                <spotLight
+                  position={[
+                    light.position.x,
+                    light.position.y,
+                    light.position.z,
+                  ]}
+                  color={light.color}
+                />
+              ) : (
+                <ambientLight intensity={0.4} />
+              ),
+            )}
           <ambientLight intensity={0.4} />
+          {environmentValue && (
+            <Environment
+              preset={environmentValue}
+              // blur={0.5}
+            />
+          )}
           <OrbitControls
             enableZoom={false}
             maxAzimuthAngle={
@@ -420,15 +520,16 @@ function Avatar({click, setClick}) {
         <div
           className={`flex flex-wrap relative self-center items-center max-h-[480px] overflow-x-hidden overflow-y-scroll`}>
           {componentSelect &&
+            componentSelect?.hasVariations &&
             Object.values(
               componentsGLB.categories[componentSelect?.component]?.variation,
             )?.map(val => (
               <div
                 onClick={() => {
-                  console.log(val.name, componentSelect);
                   setComponentSelect(component => ({
                     ...component,
                     item: val.name,
+                    hasVariations: true,
                   }));
                   // setAvatar(values => ({
                   //   ...values,
@@ -461,6 +562,7 @@ function Avatar({click, setClick}) {
                   setComponentSelect({
                     component: val,
                     item: avatar[val]?.name,
+                    hasVariations: true,
                   });
                 }}>
                 {val}
@@ -472,8 +574,27 @@ function Avatar({click, setClick}) {
         className={`w-[320px] transition-all ease-in shadow-2xl absolute h-full bg-white top-0 ${
           panelsActive ? 'right-0' : '-right-[320px] '
         } py-[36px] px-[18px] justify-center`}>
-        <div className="w-full">
-          <p className=" font-medium mb-2">Color:</p>
+        <div className="w-full relative">
+          <p className=" font-medium mb-2">
+            {componentSelect &&
+              componentSelect?.component[0]?.toUpperCase() +
+                componentSelect?.component?.substr(1)}{' '}
+            Color:
+          </p>
+          <p
+            onClick={() => {
+              let copyAvatarComponent = avatar[componentSelect?.component];
+              copyAvatarComponent.currentColor =
+                original.avatar[componentSelect?.component]?.currentColor;
+              setAvatar(val => ({
+                ...val,
+                [componentSelect?.component]: copyAvatarComponent,
+              }));
+            }}
+            className={`absolute top-0 right-0 font-medium text-indigo-600 cursor-pointer`}>
+            Reset{' '}
+          </p>
+
           {colorPicker && (
             <div className="mt-4 custom-color-picker w-[284px] flex absolute top-24 box-border bg-pink-200 z-[2] ">
               <HexColorPicker
@@ -503,7 +624,7 @@ function Avatar({click, setClick}) {
                   '--tw-ring-color':
                     avatar[componentSelect.component]?.currentColor,
                 }}
-                className={`w-[24px] h-[24px] ${
+                className={`w-[24px] h-[24px] relative ${
                   avatar[componentSelect?.component] &&
                   avatar[componentSelect?.component]?.currentColor in
                     avatar[componentSelect?.component]?.colors
@@ -520,10 +641,15 @@ function Avatar({click, setClick}) {
                 <div
                   onClick={event => {
                     event.stopPropagation();
-                    setColorPicker(!colorPicker);
+                    let component = avatar[componentSelect.component];
+                    component.currentColor = color;
+                    setAvatar(val => ({
+                      ...val,
+                      [componentSelect.component]: component,
+                    }));
                   }}
                   style={{backgroundColor: color}}
-                  className={`w-[24px] h-[24px]${
+                  className={`w-[24px] ml-[8px] relative h-[24px]${
                     avatar[componentSelect?.component] &&
                     avatar[componentSelect?.component]?.currentColor in
                       avatar[componentSelect?.component]?.colors
@@ -536,13 +662,26 @@ function Avatar({click, setClick}) {
           </div>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-4 relative">
           <p className="text-sm font-medium">
             Metalness:{' '}
             <span>
               {Math.round(avatar[componentSelect?.component]?.metalness * 100) /
                 100}{' '}
             </span>
+          </p>
+          <p
+            onClick={() => {
+              let copyAvatarComponent = avatar[componentSelect?.component];
+              copyAvatarComponent.metalness =
+                original.avatar[componentSelect?.component]?.metalness;
+              setAvatar(val => ({
+                ...val,
+                [componentSelect?.component]: copyAvatarComponent,
+              }));
+            }}
+            className={`absolute top-0 right-0 font-medium text-indigo-600 cursor-pointer`}>
+            Reset{' '}
           </p>
           <input
             className="my-2 w-full border-pink-200 bg-purple-400 stroke-purple-400 "
@@ -556,13 +695,13 @@ function Avatar({click, setClick}) {
               }));
             }}
             min={0}
-            max={10}
+            max={2}
             step={0.01}
             type={'range'}
           />
         </div>
 
-        <div className="mt-4">
+        <div className="mt-4 relative">
           <p className="text-sm font-medium">
             Roughness:{' '}
             <span>
@@ -570,6 +709,20 @@ function Avatar({click, setClick}) {
                 100}{' '}
             </span>
           </p>
+          <p
+            onClick={() => {
+              let copyAvatarComponent = avatar[componentSelect?.component];
+              copyAvatarComponent.roughness =
+                original.avatar[componentSelect?.component]?.roughness;
+              setAvatar(val => ({
+                ...val,
+                [componentSelect?.component]: copyAvatarComponent,
+              }));
+            }}
+            className={`absolute top-0 right-0 font-medium text-indigo-600 cursor-pointer`}>
+            Reset{' '}
+          </p>
+
           <input
             className="my-2 w-full border-pink-200 bg-purple-400 stroke-purple-400 "
             value={avatar[componentSelect?.component]?.roughness}
@@ -582,15 +735,39 @@ function Avatar({click, setClick}) {
               }));
             }}
             min={0}
-            max={10}
+            max={2}
             step={0.01}
             type={'range'}
           />
         </div>
+        <div
+          className={`mt-8 relative ${
+            environmentValue !== null ? 'visible' : 'hidden'
+          } `}>
+          <span className=" font-medium">{`Environment: ${environmentValue?.toUpperCase()}`}</span>
+          <p
+            onClick={() => {
+              setEnvironmentValue(null);
+            }}
+            className={`absolute top-0 right-0 font-medium text-indigo-600 cursor-pointer`}>
+            Remove{' '}
+          </p>
+        </div>
 
-        <div className="mt-8">
+        <div
+          className={`mt-8 relative ${
+            environmentValue === null ? 'visible' : 'hidden'
+          } `}>
           <span className=" font-medium">Lights:</span>
-          <div>
+          <p
+            onClick={() => {
+              setLights([...original.lights]);
+            }}
+            className={`absolute top-0 right-0 font-medium text-indigo-600 cursor-pointer`}>
+            Reset{' '}
+          </p>
+
+          <div className={`max-h-[220px] overflow-scroll`}>
             {lights?.map((light, key) => (
               <div
                 onClick={event => {
@@ -696,7 +873,14 @@ function Avatar({click, setClick}) {
 
                   <div
                     onClick={() => {
-                      setShowPositionSlider({key: key + 1, position: 'color'});
+                      if (showPositionSlider.key !== key + 1) {
+                        setShowPositionSlider({
+                          key: key + 1,
+                          position: 'color',
+                        });
+                      } else {
+                        setShowPositionSlider(false);
+                      }
                     }}
                     style={{
                       '--tw-ring-color': light.color,

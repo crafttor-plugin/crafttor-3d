@@ -186,7 +186,11 @@ export function getResponseAPI() {
       ],
       preset: {
         color: '#ecbcb4',
+        applyTo: ['Ears', 'Face', 'body'],
+        variation: 'Scene',
       },
+      readOnly: false,
+      rule: [],
     },
     category: [
       {
@@ -237,6 +241,14 @@ export function getResponseAPI() {
           variation: 'Cloth_1',
           color: '#0F6AA4',
         },
+        colors: [
+          '#c58c85',
+          '#ecbcb4',
+          '#d1a3a4',
+          '#a1665e',
+          '#503335',
+          '#592f2a',
+        ],
         variation: [
           {
             name: 'cloth1001',

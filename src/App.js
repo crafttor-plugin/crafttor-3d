@@ -9,17 +9,22 @@ import {useLoader} from '@react-three/fiber';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 function App() {
   const [click, setClick] = useState();
-  const file = getGLBFile();
-  const glbfile = useLoader(
-    GLTFLoader,
-    'https://crafttor-admin.s3.amazonaws.com/modal/category/3DAvatar_Main_Cap.glb',
-  );
-  console.log(glbfile);
+  const [environmentValue, setEnvironmentValue] = useState(null);
   return (
     <div className="w-[100vw] h-[100vh] overflow-hidden ">
-      <Header click={click} setClick={setClick} />
+      <Header
+        environmentValue={environmentValue}
+        setEnvironmentValue={setEnvironmentValue}
+        click={click}
+        setClick={setClick}
+      />
       <div className="  w-full h-full bg-[#F2F2F2] relative justify-center self-center items-center">
-        <Avatar click={click} setClick={setClick} />
+        <Avatar
+          environmentValue={environmentValue}
+          setEnvironmentValue={setEnvironmentValue}
+          click={click}
+          setClick={setClick}
+        />
       </div>
     </div>
   );
